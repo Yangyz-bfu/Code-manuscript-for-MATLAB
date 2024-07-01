@@ -1,0 +1,218 @@
+-------------------Infinite slope configuration sensitivity analysis for Figure4a-------------------
+% 1. 参数设置
+Cs = 0.28;
+Cr = 9.11;
+theta0 = [10, 80];
+Z = 1.79;
+gammas = 12.25;
+phi = 15.41;
+gammaw = 9.8;
+m = 0.5;
+sz = 10;
+
+% 2. 变量取值
+theta = randi(theta0, 1000, 1) + rand(1000, 1) - 0.5;
+
+% 3. 带入计算
+FOS = (Cs+Cr+Z.*(gammas-m*gammaw)*(cosd(theta)).*(cosd(theta))*tand(phi))./(Z*gammas*(sind(theta)).*(cosd(theta)));
+% 4. 输出结果矩阵
+result_matrix=[theta,FOS];
+
+% 5.绘制散点图
+figure;
+scatter(theta, FOS, sz, 'filled', 'DisplayName', 'Data Points');
+xlabel('\theta');
+ylabel('FOS');
+title('Sensitivity Analysis of ISM');
+legend('show');
+
+--------------------Symmetrical Finite slope configuration sensitivity analysis for Figure4a-------------------
+
+clc;
+clear all;
+close all;
+
+%input parameters
+Cs = 0.28;
+Cr = 9.11;
+Zr = 1;
+theta0 = [10,80];
+Z = 1.795;
+gammas = 12.25;
+w = 3.08;
+phi = 15.41;
+gammaw = 9.8;
+m = 0.5;
+alpha = 10;  
+sz = 10;
+
+%calculate and figurate
+for i=1
+    theta = randi(theta0,1000,1)+rand(1000,1)-0.5;
+    FOS = ((2*Cr*Zr*cosd(theta)./(sind(alpha))) + w*Z*(gammas-m*gammaw)*(cosd(theta)).^2*tand(phi)) ./ (w*Z*gammas*cosd(theta).*sind(theta));
+        
+    % Extract data for plotting
+    idx= find(FOS>0);
+    x = theta(idx);
+    y= FOS(idx);
+    result_matrix=[x,y];
+    % Plot scatter plot
+    plot(x,y,'.');
+    xlabel('\theta');
+    ylabel('FOS');
+    title('Sensitivity Analysis of SFSM');
+    legend('show');
+end
+
+--------------------Asymmetrical Finite slope configuration sensitivity analysis for Figure4a-------------------
+
+clc;
+clear all;
+close all;
+
+%input parameters
+Cs = 0.28;
+Cr = 9.11;
+Zr = 1;
+theta0 = [10,80];
+Z = 1.795;
+gammas = 12.25;
+w = 3.08;
+phi = 15.41;
+gammaw = 9.8;
+m = 0.5;
+alpha1_range = [10,80]; 
+alpha0= 10;
+sz = 10;
+number_samples = 1000;
+theta = randi(theta0,number_samples,1)+rand(number_samples,1)-0.5;
+
+
+% 初始化存储结果的变量
+alpha1_samples = zeros(number_samples, 1);
+alpha2_samples = zeros(number_samples, 1);
+
+% 生成 alpha1 和对应的 alpha2
+for i = 1:number_samples
+    valid_alpha2 = false;
+    while ~valid_alpha2
+        % 生成 alpha1
+        alpha1_samples(i) = (alpha1_range(2) - alpha1_range(1)) .* rand() + alpha1_range(1);
+        
+        % 计算求根公式系数
+        A_coeff = tand(alpha1_samples(i)) - tand(alpha0);
+        B_coeff = tand(alpha1_samples(i)).^2;
+        C_coeff = -tand(alpha0) .* tand(alpha1_samples(i)).^2;
+        
+        % 计算一元二次方程的解
+        discriminant = B_coeff.^2 - 4 .* A_coeff .* C_coeff;
+        if discriminant >= 0
+            alpha2 = atand((-B_coeff + sqrt(discriminant)) / (2 * A_coeff));
+            if alpha2 >= 0
+                alpha2_samples(i) = alpha2;
+                valid_alpha2 = true;
+            end
+        end
+    end
+end
+
+% 将结果存储在矩阵中
+alpha_matrix = [alpha1_samples, alpha2_samples];
+
+FOS = ((Cr*Zr*cosd(theta)./(sind(alpha1_samples))+(Cr*Zr*cosd(theta)./(sind(alpha2_samples)))) + w*Z*(gammas-m*gammaw)*(cosd(theta)).^2*tand(phi)) ./ (w*Z*gammas*cosd(theta).*sind(theta));
+        
+% Extract data for plotting
+idx= find(FOS>0);
+x = theta(idx);
+y= FOS(idx);
+
+% Plot scatter plot
+plot(x,y,'.');
+
+--------------------alapha sampling for Figure4b-------------------
+clc;
+clear all;
+close all;
+
+% 定义 alpha_1 的范围
+alpha1_range = [10, 80];
+
+% 定义 alpha0 的取值
+alpha0 = 45;
+number_samples = 1000;
+
+% 初始化存储结果的变量
+alpha1_samples = zeros(number_samples, 1);
+alpha2_samples = zeros(number_samples, 1);
+
+% 生成 alpha1 和对应的 alpha2
+for i = 1:number_samples
+    valid_alpha2 = false;
+    while ~valid_alpha2
+        % 生成 alpha1
+        alpha1_samples(i) = (alpha1_range(2) - alpha1_range(1)) .* rand() + alpha1_range(1);
+        
+        % 计算求根公式系数
+        A_coeff = tand(alpha1_samples(i)) - tand(alpha0);
+        B_coeff = tand(alpha1_samples(i)).^2;
+        C_coeff = -tand(alpha0) .* tand(alpha1_samples(i)).^2;
+        
+        % 计算一元二次方程的解
+        discriminant = B_coeff.^2 - 4 .* A_coeff .* C_coeff;
+        if discriminant >= 0
+            alpha2 = atand((-B_coeff + sqrt(discriminant)) / (2 * A_coeff));
+            if alpha2 >= 0
+                alpha2_samples(i) = alpha2;
+                valid_alpha2 = true;
+            end
+        end
+    end
+end
+
+% 将结果存储在矩阵中
+alpha_matrix = [alpha1_samples, alpha2_samples];
+
+--------------------code for Figure4c-------------------
+clc;
+clear all;
+close all;
+
+% 定义 alpha_1 的范围
+alpha1_range = [10, 80];
+
+% 定义 alpha0 的取值
+alpha0 = 45;
+number_samples = 1000;
+
+% 初始化存储结果的变量
+alpha1_samples = zeros(number_samples, 1);
+alpha2_samples = zeros(number_samples, 1);
+
+% 生成 alpha1 和对应的 alpha2
+for i = 1:number_samples
+    valid_alpha2 = false;
+    while ~valid_alpha2
+        % 生成 alpha1
+        alpha1_samples(i) = (alpha1_range(2) - alpha1_range(1)) .* rand() + alpha1_range(1);
+        
+        % 计算求根公式系数
+        A_coeff = tand(alpha1_samples(i)) - tand(alpha0);
+        B_coeff = tand(alpha1_samples(i)).^2;
+        C_coeff = -tand(alpha0) .* tand(alpha1_samples(i)).^2;
+        
+        % 计算一元二次方程的解
+        discriminant = B_coeff.^2 - 4 .* A_coeff .* C_coeff;
+        if discriminant >= 0
+            alpha2 = atand((-B_coeff + sqrt(discriminant)) / (2 * A_coeff));
+            if alpha2 >= 0
+                alpha2_samples(i) = alpha2;
+                valid_alpha2 = true;
+            end
+        end
+    end
+end
+
+% 将结果存储在矩阵中
+alpha_matrix = [alpha1_samples, alpha2_samples];
+
+
